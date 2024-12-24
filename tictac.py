@@ -11,7 +11,7 @@ BOARD_SIZE = 3
 SQUARE_SIZE = WIDTH // BOARD_SIZE
 
 bg_image = pygame.image.load("background.png")
-bg_image = pygame.transform.scale(bg_image, (600,600))
+bg_image = pygame.transform.scale(bg_image, (WIDTH,HEIGHT))
 o_image = pygame.image.load("o.png")
 x_image = pygame.image.load("x.png")
 # Colors
@@ -44,7 +44,7 @@ def draw_x(col, row):
     screen.blit(x_image,((col * SQUARE_SIZE)+8, (row * SQUARE_SIZE)+8))
 def draw_o(col, row):
 
-    screen.blit(o_image,((col * SQUARE_SIZE )+ 8, (row * SQUARE_SIZE) + 8))
+    screen.blit(o_image,((col * SQUARE_SIZE )+8, (row * SQUARE_SIZE) + 8))
 def is_winner(player):
     # Check rows and columns
     for i in range(BOARD_SIZE):
@@ -101,13 +101,17 @@ def best_move():
     return best_move
 
 # Main game loop
+
+game_over = False
+
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
 
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+        if not game_over and event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             x, y = event.pos
             col = x // SQUARE_SIZE
             row = y // SQUARE_SIZE
@@ -117,7 +121,12 @@ while True:
 
                 if not is_winner('X') and not is_board_full():
                     ai_move = best_move()
-                    board[ai_move[0]][ai_move[1]] = 'O'
+                    if ai_move:
+                        board[ai_move[0]][ai_move[1]] = 'O'
+        elif game_over:
+            pygame.time.delay(800)
+            board = [['' for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
+            game_over = False
 
     # Draw the board
     screen.fill(WHITE)
@@ -126,24 +135,17 @@ while True:
 
     # Check for a winner or a tie
     if is_winner('X'):
-        text = font.render("Player X wins!", True,(0,0,0))
+        text = font.render("Player X wins!", True, (0, 0, 0))
         screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
-
-
-
+        game_over = True
     elif is_winner('O'):
-        text = font.render("Player O wins!", True,(0,0,0))
+        text = font.render("Player O wins!", True, (0, 0, 0))
         screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
-
-
-
-
-
+        game_over = True
     elif is_board_full():
-        text = font.render("It's a tie!", True,(0,0,0))
+        text = font.render("It's a tie!", True, (0, 0, 0))
         screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
-
-
-
+        game_over = True
 
     pygame.display.update()
+
